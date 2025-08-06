@@ -43,15 +43,6 @@ class PokerHandHistoryEditor {
                     this.insertText(value);
                 }
             });
-            
-            // Prevent touch events from triggering virtual keyboard
-            button.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-            }, { passive: false });
-            
-            button.addEventListener('touchend', (e) => {
-                e.preventDefault();
-            }, { passive: false });
         });
 
         // Special buttons
