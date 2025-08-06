@@ -27,13 +27,31 @@ class PokerHandHistoryEditor {
     setupEventListeners() {
         // Keyboard button clicks
         document.querySelectorAll('.key-btn').forEach(button => {
+            // Prevent virtual keyboard on mobile
+            button.setAttribute('readonly', 'readonly');
+            button.setAttribute('inputmode', 'none');
+            button.setAttribute('autocomplete', 'off');
+            button.setAttribute('autocorrect', 'off');
+            button.setAttribute('autocapitalize', 'off');
+            button.setAttribute('spellcheck', 'false');
+            
             button.addEventListener('click', (e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 const value = button.dataset.value;
                 if (value) {
                     this.insertText(value);
                 }
             });
+            
+            // Prevent touch events from triggering virtual keyboard
+            button.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+            }, { passive: false });
+            
+            button.addEventListener('touchend', (e) => {
+                e.preventDefault();
+            }, { passive: false });
         });
 
         // Special buttons
