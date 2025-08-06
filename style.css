@@ -1,0 +1,211 @@
+/* Custom styles for the poker hand history editor */
+
+/* Keyboard container with 3D perspective */
+.keyboard-container {
+    perspective: 1000px;
+    transform: rotateX(15deg) rotateY(-5deg);
+    margin: 2rem 0;
+    padding: 1rem;
+    background: linear-gradient(145deg, #2d3748, #1a202c);
+    border-radius: 20px;
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        0 10px 20px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Keyboard row styling */
+.keyboard-row {
+    display: flex;
+    gap: 0.25rem;
+    margin-bottom: 0.25rem;
+    justify-content: center;
+}
+
+.keyboard-row:last-child {
+    margin-bottom: 0;
+}
+
+/* Base keyboard button styling */
+.key-btn {
+    @apply text-white font-bold rounded-lg transition-all duration-150 transform;
+    min-height: 40px;
+    min-width: 40px;
+    font-size: 12px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    box-shadow: 
+        0 2px 4px rgba(0, 0, 0, 0.3),
+        0 1px 2px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    background: linear-gradient(145deg, #4a5568, #2d3748);
+}
+
+.key-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 8px rgba(0, 0, 0, 0.4),
+        0 2px 4px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.key-btn:active {
+    transform: translateY(1px);
+    box-shadow: 
+        0 1px 2px rgba(0, 0, 0, 0.3),
+        inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Suit button styling */
+.suit-btn {
+    background: linear-gradient(145deg, #4a5568, #2d3748);
+    color: white;
+}
+
+.suit-btn[data-value="h"] {
+    color: #f56565; /* Red for hearts */
+}
+
+.suit-btn[data-value="d"] {
+    color: #3182ce; /* Blue for diamonds */
+}
+
+.suit-btn[data-value="s"] {
+    color: #2d3748; /* Black for spades */
+}
+
+.suit-btn[data-value="c"] {
+    color: #38a169; /* Green for clubs */
+}
+
+/* Action button styling */
+.action-btn {
+    background: linear-gradient(145deg, #3182ce, #2b6cb0);
+    color: white;
+}
+
+/* Position button styling */
+.position-btn {
+    background: linear-gradient(145deg, #38b2ac, #319795);
+    color: white;
+}
+
+/* Player button styling */
+.player-btn {
+    background: linear-gradient(145deg, #805ad5, #6b46c1);
+    color: white;
+}
+
+/* Utility button styling */
+.utility-btn {
+    background: linear-gradient(145deg, #718096, #4a5568);
+    color: white;
+}
+
+/* Operator button styling */
+.operator-btn {
+    background: linear-gradient(145deg, #ed8936, #dd6b20);
+    color: white;
+}
+
+/* Space button styling */
+.space-btn {
+    background: linear-gradient(145deg, #48bb78, #38a169);
+    color: white;
+    flex: 2;
+    min-width: 80px;
+}
+
+/* Textarea styling */
+#handHistory {
+    line-height: 1.5;
+    tab-size: 4;
+}
+
+/* Responsive design adjustments */
+@media (max-width: 768px) {
+    .keyboard-container {
+        transform: rotateX(10deg) rotateY(-3deg);
+        margin: 1rem 0;
+        padding: 0.75rem;
+    }
+    
+    .key-btn {
+        min-height: 36px;
+        min-width: 36px;
+        font-size: 11px;
+    }
+    
+    .keyboard-row {
+        gap: 0.2rem;
+        margin-bottom: 0.2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .keyboard-container {
+        transform: rotateX(5deg) rotateY(-2deg);
+        margin: 0.5rem 0;
+        padding: 0.5rem;
+    }
+    
+    .key-btn {
+        min-height: 32px;
+        min-width: 32px;
+        font-size: 10px;
+    }
+    
+    .keyboard-row {
+        gap: 0.15rem;
+        margin-bottom: 0.15rem;
+    }
+}
+
+/* Focus styles for better accessibility */
+.key-btn:focus {
+    @apply outline-none;
+    box-shadow: 
+        0 0 0 2px rgba(59, 130, 246, 0.5),
+        0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Animation for button clicks */
+@keyframes buttonPress {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+}
+
+.key-btn:active {
+    animation: buttonPress 0.1s ease-in-out;
+}
+
+/* Loading state for import/export buttons */
+.loading {
+    @apply opacity-50 cursor-not-allowed;
+}
+
+/* Success/error message styling */
+.message {
+    @apply fixed top-4 right-4 px-6 py-3 rounded-lg text-white font-medium z-50;
+    animation: slideIn 0.3s ease-out;
+}
+
+.message.success {
+    @apply bg-green-500;
+}
+
+.message.error {
+    @apply bg-red-500;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+} 

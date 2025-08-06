@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poker Hand History Editor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 min-h-screen">
+    <div class="container mx-auto px-4 py-4 max-w-2xl">
+        <!-- Header Text -->
+        <div class="text-center mb-6 text-white">
+            <h1 class="text-2xl font-bold mb-1 drop-shadow-lg">Poker Hand History Editor</h1>
+            <p class="text-xl font-medium drop-shadow-lg">Create and edit poker hand histories</p>
+        </div>
+
+        <!-- Main Editor Area -->
+        <div class="bg-white rounded-lg shadow-lg p-4 mb-6">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-xl font-semibold text-gray-800">Hand History</h2>
+                <div class="flex space-x-2">
+                    <button id="exportBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
+                        Export
+                    </button>
+                    <button id="importBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                        Import
+                    </button>
+                    <input type="file" id="fileInput" accept=".txt" class="hidden">
+                </div>
+            </div>
+            <textarea 
+                id="handHistory" 
+                class="w-full h-48 p-3 border border-gray-300 rounded-lg font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Start typing your hand history here... Use the custom keyboard below for quick input."
+            ></textarea>
+        </div>
+
+        <!-- Custom Keyboard -->
+        <div class="keyboard-container">
+            <!-- Row 1: Numbers -->
+            <div class="keyboard-row">
+                <button class="key-btn" data-value="1">1</button>
+                <button class="key-btn" data-value="2">2</button>
+                <button class="key-btn" data-value="3">3</button>
+                <button class="key-btn" data-value="4">4</button>
+                <button class="key-btn" data-value="5">5</button>
+                <button class="key-btn" data-value="6">6</button>
+                <button class="key-btn" data-value="7">7</button>
+                <button class="key-btn" data-value="8">8</button>
+                <button class="key-btn" data-value="9">9</button>
+                <button class="key-btn" data-value="0">0</button>
+            </div>
+
+            <!-- Row 2: Suits & Ranks -->
+            <div class="keyboard-row">
+                <button class="key-btn suit-btn" data-value="s">s</button>
+                <button class="key-btn suit-btn" data-value="h">h</button>
+                <button class="key-btn suit-btn" data-value="d">d</button>
+                <button class="key-btn suit-btn" data-value="c">c</button>
+                <button class="key-btn" data-value="A">A</button>
+                <button class="key-btn" data-value="K">K</button>
+                <button class="key-btn" data-value="Q">Q</button>
+                <button class="key-btn" data-value="J">J</button>
+                <button class="key-btn" data-value="T">T</button>
+            </div>
+
+            <!-- Row 3: Street Indicators & Actions -->
+            <div class="keyboard-row">
+                <button class="key-btn action-btn" data-value="FLOP">FLOP</button>
+                <button class="key-btn action-btn" data-value="TURN">TURN</button>
+                <button class="key-btn action-btn" data-value="RIVER">RIVER</button>
+                <button class="key-btn action-btn" data-value="BET">BET</button>
+                <button class="key-btn action-btn" data-value="RAISE">RAISE</button>
+                <button class="key-btn action-btn" data-value="FOLD">FOLD</button>
+                <button class="key-btn action-btn" data-value="CALL">CALL</button>
+                <button class="key-btn action-btn" data-value="ALL IN">ALL IN</button>
+            </div>
+
+            <!-- Row 4: Positions -->
+            <div class="keyboard-row">
+                <button class="key-btn position-btn" data-value="BTN">BTN</button>
+                <button class="key-btn position-btn" data-value="CO">CO</button>
+                <button class="key-btn position-btn" data-value="HJ">HJ</button>
+                <button class="key-btn position-btn" data-value="LJ">LJ</button>
+                <button class="key-btn position-btn" data-value="MP">MP</button>
+                <button class="key-btn position-btn" data-value="EP">EP</button>
+                <button class="key-btn position-btn" data-value="UTG1">UTG1</button>
+                <button class="key-btn position-btn" data-value="UTG">UTG</button>
+                <button class="key-btn position-btn" data-value="SB">SB</button>
+                <button class="key-btn position-btn" data-value="BB">BB</button>
+            </div>
+
+            <!-- Row 5: Utility & Players -->
+            <div class="keyboard-row">
+                <button class="key-btn utility-btn" data-value=".">.</button>
+                <button class="key-btn utility-btn" data-value="X">X</button>
+                <button class="key-btn utility-btn" data-value="%">%</button>
+                <button class="key-btn utility-btn" data-value="ANTE">ANTE</button>
+                <button class="key-btn player-btn" data-value="HERO">HERO</button>
+                <button class="key-btn player-btn" data-value="VILLAIN">VILLAIN</button>
+                <button class="key-btn utility-btn" data-value="$">$</button>
+                <button id="backspaceBtn" class="key-btn utility-btn">⌫</button>
+            </div>
+
+            <!-- Row 6: Operators & Space -->
+            <div class="keyboard-row">
+                <button class="key-btn operator-btn" data-value="+ -">+ -</button>
+                <button class="key-btn operator-btn" data-value="/ =">/ =</button>
+                <button class="key-btn space-btn" data-value=" ">SPACE</button>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="text-center mt-8 text-gray-300">
+            <p>Your hand history is automatically saved to your browser's local storage.</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
