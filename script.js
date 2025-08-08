@@ -14,6 +14,12 @@ class PokerHandHistoryEditor {
         this.history = [];
         this.historyIndex = -1;
         this.maxHistorySize = 50;
+
+        // Track focus and cursor for mobile to avoid bringing up native keyboard
+        this.isCoarsePointer = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+        this.isTextareaFocused = false;
+        this.cursorStart = 0;
+        this.cursorEnd = 0;
         
         this.init();
     }
@@ -27,19 +33,26 @@ class PokerHandHistoryEditor {
     setupEventListeners() {
         // Keyboard button clicks
         document.querySelectorAll('.key-btn').forEach(button => {
-            // Prevent virtual keyboard on mobile
-            button.setAttribute('readonly', 'readonly');
-            button.setAttribute('inputmode', 'none');
-            button.setAttribute('autocomplete', 'off');
-            button.setAttribute('autocorrect', 'off');
-            button.setAttribute('autocapitalize', 'off');
-            button.setAttribute('spellcheck', 'false');
+            // Prevent focus changes and default behavior on touch to avoid opening native keyboard
+            button.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            }, { passive: false });
+            button.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
             
             button.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 const value = button.dataset.value;
                 if (value) {
+                    // Ensure textarea is not focused on mobile before inserting, so the OS keyboard stays hidden
+                    if (this.isCoarsePointer && document.activeElement === this.textarea) {
+                        this.textarea.blur();
+                        this.isTextareaFocused = false;
+                    }
                     this.insertText(value);
                 }
             });
@@ -63,31 +76,55 @@ class PokerHandHistoryEditor {
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => this.handleKeyboardShortcuts(e));
+
+        // Track textarea focus and selection so we can avoid focusing on mobile
+        this.textarea.addEventListener('focus', () => {
+            this.isTextareaFocused = true;
+            this.cursorStart = this.textarea.selectionStart || 0;
+            this.cursorEnd = this.textarea.selectionEnd || this.cursorStart;
+        });
+        this.textarea.addEventListener('blur', () => {
+            this.isTextareaFocused = false;
+            this.cursorStart = this.textarea.selectionStart || this.cursorStart;
+            this.cursorEnd = this.textarea.selectionEnd || this.cursorStart;
+        });
+        this.textarea.addEventListener('select', () => {
+            this.cursorStart = this.textarea.selectionStart || 0;
+            this.cursorEnd = this.textarea.selectionEnd || this.cursorStart;
+        });
+        this.textarea.addEventListener('keyup', () => {
+            this.cursorStart = this.textarea.selectionStart || 0;
+            this.cursorEnd = this.textarea.selectionEnd || this.cursorStart;
+        });
     }
 
     insertText(text) {
-        const start = this.textarea.selectionStart;
-        const end = this.textarea.selectionEnd;
+        const start = this.isTextareaFocused ? this.textarea.selectionStart : this.cursorStart;
+        const end = this.isTextareaFocused ? this.textarea.selectionEnd : this.cursorEnd;
         const currentValue = this.textarea.value;
         
         // Insert text at cursor position
         const newValue = currentValue.substring(0, start) + text + currentValue.substring(end);
         this.textarea.value = newValue;
         
-        // Set cursor position after inserted text
+        // Update internal cursor position after inserted text
         const newCursorPos = start + text.length;
-        this.textarea.setSelectionRange(newCursorPos, newCursorPos);
-        
-        // Focus back to textarea
-        this.textarea.focus();
+        this.cursorStart = newCursorPos;
+        this.cursorEnd = newCursorPos;
+
+        // Only move selection and focus on non-mobile to avoid opening native keyboard
+        if (!this.isCoarsePointer) {
+            this.textarea.setSelectionRange(newCursorPos, newCursorPos);
+            this.textarea.focus();
+        }
         
         // Trigger input event for auto-save
         this.textarea.dispatchEvent(new Event('input'));
     }
 
     backspace() {
-        const start = this.textarea.selectionStart;
-        const end = this.textarea.selectionEnd;
+        const start = this.isTextareaFocused ? this.textarea.selectionStart : this.cursorStart;
+        const end = this.isTextareaFocused ? this.textarea.selectionEnd : this.cursorEnd;
         const currentValue = this.textarea.value;
         
         if (start === end) {
@@ -95,23 +132,44 @@ class PokerHandHistoryEditor {
             if (start > 0) {
                 const newValue = currentValue.substring(0, start - 1) + currentValue.substring(end);
                 this.textarea.value = newValue;
-                this.textarea.setSelectionRange(start - 1, start - 1);
+                this.cursorStart = start - 1;
+                this.cursorEnd = start - 1;
+                if (!this.isCoarsePointer) {
+                    this.textarea.setSelectionRange(start - 1, start - 1);
+                }
             }
         } else {
             // Delete selected text
             const newValue = currentValue.substring(0, start) + currentValue.substring(end);
             this.textarea.value = newValue;
-            this.textarea.setSelectionRange(start, start);
+            this.cursorStart = start;
+            this.cursorEnd = start;
+            if (!this.isCoarsePointer) {
+                this.textarea.setSelectionRange(start, start);
+            }
         }
         
-        this.textarea.focus();
+        if (!this.isCoarsePointer) {
+            this.textarea.focus();
+        } else if (document.activeElement === this.textarea) {
+            this.textarea.blur();
+            this.isTextareaFocused = false;
+        }
         this.textarea.dispatchEvent(new Event('input'));
     }
 
     clearAll() {
         if (confirm('Are you sure you want to clear all content?')) {
             this.textarea.value = '';
-            this.textarea.focus();
+            this.cursorStart = 0;
+            this.cursorEnd = 0;
+            if (!this.isCoarsePointer) {
+                this.textarea.focus();
+                this.textarea.setSelectionRange(0, 0);
+            } else if (document.activeElement === this.textarea) {
+                this.textarea.blur();
+                this.isTextareaFocused = false;
+            }
             this.textarea.dispatchEvent(new Event('input'));
         }
     }
@@ -120,7 +178,22 @@ class PokerHandHistoryEditor {
         if (this.historyIndex > 0) {
             this.historyIndex--;
             this.textarea.value = this.history[this.historyIndex];
-            this.textarea.focus();
+            if (!this.isCoarsePointer) {
+                this.textarea.focus();
+                // Try to restore cursor near end after undo on desktop
+                const pos = this.textarea.value.length;
+                this.textarea.setSelectionRange(pos, pos);
+                this.cursorStart = pos;
+                this.cursorEnd = pos;
+            } else {
+                // On mobile keep it unfocused to avoid keyboard
+                if (document.activeElement === this.textarea) {
+                    this.textarea.blur();
+                }
+                this.isTextareaFocused = false;
+                this.cursorStart = this.textarea.value.length;
+                this.cursorEnd = this.cursorStart;
+            }
             this.saveToLocalStorage();
         }
     }
@@ -273,8 +346,12 @@ class PokerHandHistoryEditor {
 
     // Utility method to set cursor position
     setCursorPosition(start, end = start) {
-        this.textarea.setSelectionRange(start, end);
-        this.textarea.focus();
+        this.cursorStart = start;
+        this.cursorEnd = end;
+        if (!this.isCoarsePointer) {
+            this.textarea.setSelectionRange(start, end);
+            this.textarea.focus();
+        }
     }
 }
 
